@@ -6,8 +6,8 @@ import ru.yandex.practicum.catsgram.exception.DuplicatedDataException;
 import ru.yandex.practicum.catsgram.model.User;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,8 +18,8 @@ public class UserService {
 
     private final Map<Long, User> users = new HashMap<>();
 
-    public Collection<User> findUser() {
-        return users.values();
+    public List<User> findUser() {
+        return users.values().stream().toList();
     }
 
     public User createUser(User user) {

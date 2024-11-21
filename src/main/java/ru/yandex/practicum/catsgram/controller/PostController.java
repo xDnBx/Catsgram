@@ -1,5 +1,9 @@
 package ru.yandex.practicum.catsgram.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
@@ -8,14 +12,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/posts")
 public class PostController {
 
     private final PostService postService;
-
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
 
     @GetMapping
     public List<Post> findAll(
@@ -26,6 +27,8 @@ public class PostController {
     }
 
     @PostMapping
+    // указываем, что код успешного ответа должен быть 201 Created
+    @ResponseStatus(HttpStatus.CREATED)
     public Post create(@RequestBody Post post) {
         return postService.create(post);
     }
@@ -36,7 +39,12 @@ public class PostController {
     }
 
     @GetMapping("/post/{postId}")
-    public Optional<Post> getPost(@PathVariable Long postId) {
-        return postService.findPostById(postId);
+    public ResponseEntity<Optional<Post>> getPost(@PathVariable Long postId) {
+        Optional<Post> result = postService.findPostById(postId);
+        // указываем нужные заголовки и их значения
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        // возвращаем ResponseEntity с настроенными телом, заголовками и кодом ответа
+        return new ResponseEntity<>(result, headers, HttpStatus.OK);
     }
 }
