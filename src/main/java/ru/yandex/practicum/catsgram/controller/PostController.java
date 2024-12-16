@@ -1,63 +1,33 @@
 package ru.yandex.practicum.catsgram.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.catsgram.exception.ParameterNotValidException;
-import ru.yandex.practicum.catsgram.model.Post;
+import ru.yandex.practicum.catsgram.dto.NewPostRequest;
+import ru.yandex.practicum.catsgram.dto.PostDto;
+import ru.yandex.practicum.catsgram.dto.UpdatePostRequest;
 import ru.yandex.practicum.catsgram.service.PostService;
-
-import javax.swing.*;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
 public class PostController {
-
     private final PostService postService;
 
-    @GetMapping
-    public List<Post> findAll(
-            @RequestParam(name = "sort", defaultValue = "desc") String sort,
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
-
-        PostService.SortOrder sortOrder = PostService.SortOrder.from(sort);
-        if (sortOrder == null) {
-            throw new ParameterNotValidException("sort", "Получено: " + sort + " должно быть: asc или desc");
-        }
-        if (from < 0) {
-            throw new ParameterNotValidException("from", "Начало выборки должно быть положительным числом");
-        }
-        if (size <= 0) {
-            throw new ParameterNotValidException("size", "Размер должен быть больше нуля");
-        }
-        return postService.findAll(size, from, sort);
-    }
-
     @PostMapping
-    // указываем, что код успешного ответа должен быть 201 Created
     @ResponseStatus(HttpStatus.CREATED)
-    public Post create(@RequestBody Post post) {
-        return postService.create(post);
+    public PostDto createPost(@RequestBody NewPostRequest post) {
+        return postService.createPost(post);
     }
 
-    @PutMapping
-    public Post update(@RequestBody Post newPost) {
-        return postService.update(newPost);
+    @GetMapping("/{postId}")
+    @ResponseStatus(HttpStatus.OK)
+    public PostDto getPostById(@PathVariable("postId") long postId) {
+        return postService.getPostById(postId);
     }
 
-    @GetMapping("/post/{postId}")
-    public ResponseEntity<Optional<Post>> getPost(@PathVariable Long postId) {
-        Optional<Post> result = postService.findPostById(postId);
-        // указываем нужные заголовки и их значения
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        // возвращаем ResponseEntity с настроенными телом, заголовками и кодом ответа
-        return new ResponseEntity<>(result, headers, HttpStatus.OK);
+    @PutMapping("/{postId}")
+    public PostDto updatePost(@PathVariable("postId") long postId, @RequestBody UpdatePostRequest post) {
+        return postService.updatePost(postId, post);
     }
 }
